@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Fear Filter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d0f;
+      color: #f0ede8;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .card {
+      max-width: 560px;
+      width: 100%;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-icon { font-size: 64px; line-height: 1; margin-bottom: 16px; }
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .tagline {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: #16161c;
+      border: 1px solid #1f1f26;
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .step-num {
+      width: 32px; height: 32px;
+      background: #e0412a;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+    }
+    .step-content h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .step-content p { font-size: 13px; color: #666; line-height: 1.6; }
+    .step-content a { color: #e0412a; text-decoration: none; }
+    .step-content a:hover { text-decoration: underline; }
+    .step-content code {
+      background: #1f1f26;
+      border: 1px solid #2a2a35;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 12px;
+      color: #f0ede8;
+    }
+    .cta {
+      text-align: center;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: #e0412a;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: background 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .cta-btn:hover { background: #c93520; }
+    .note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #3a3a42;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .note a { color: #555; text-decoration: none; }
+    .note a:hover { color: #888; }
+    .fears-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .fear-tag {
+      background: #1f1f26;
+      border: 1px solid #2a2a35;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hero">
+      <div class="hero-icon">🙈</div>
+      <h1>Welcome to Fear Filter</h1>
+      <p class="tagline">AI-powered image filtering that automatically detects and hides<br>images of the things that bother you most.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Get a free Anthropic API key</h3>
+          <p>Fear Filter uses Claude AI to analyze images. You'll need your own API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> — it's free to sign up. Checking images costs roughly <strong style="color:#f0ede8">$0.001 per image</strong> (one tenth of a cent).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Paste your key into Fear Filter</h3>
+          <p>Click the Fear Filter icon in your Chrome toolbar, paste your API key (starts with <code>sk-ant-</code>) into the field, and hit <strong style="color:#f0ede8">Save</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Choose what to filter</h3>
+          <p>Select any combination of fears to block. Fear Filter supports:</p>
+          <div class="fears-preview">
+            <span class="fear-tag">🐍 Snakes</span>
+            <span class="fear-tag">🕷️ Spiders</span>
+            <span class="fear-tag">🤡 Clowns</span>
+            <span class="fear-tag">💉 Needles</span>
+            <span class="fear-tag">🩸 Blood</span>
+            <span class="fear-tag">🏔️ Heights</span>
+            <span class="fear-tag">🦈 Sharks</span>
+            <span class="fear-tag">🐀 Rats & Mice</span>
+            <span class="fear-tag">🪳 Cockroaches</span>
+            <span class="fear-tag">🐝 Wasps & Bees</span>
+            <span class="fear-tag">🪆 Dolls & Puppets</span>
+            <span class="fear-tag">👁️ Eyes Close-up</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Browse freely</h3>
+          <p>Fear Filter runs automatically on every page you visit. Detected images are blurred — click any blurred image to reveal it if you choose.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="cta-btn" onclick="window.close()">Got it — let's go!</button>
+      <div class="note">
+        Your API key is stored locally on your device and never sent anywhere except directly to Anthropic.<br>
+        <a href="privacy.html" target="_blank">Privacy Policy</a> · <a href="https://console.anthropic.com" target="_blank">Get API Key</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

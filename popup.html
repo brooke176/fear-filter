@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fear Filter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      background: #0d0d0f;
+      color: #f0ede8;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+
+    .header {
+      padding: 14px 18px 12px;
+      background: linear-gradient(135deg, #1a1a1f, #0d0d0f);
+      border-bottom: 1px solid #1f1f26;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-icon { font-size: 24px; line-height: 1; }
+    .header-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .header-sub { font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; color: #444; margin-top: 2px; }
+
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #2a2a35; border-radius: 22px; cursor: pointer; transition: .25s; }
+    .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #555; border-radius: 50%; transition: .25s; }
+    input:checked + .slider { background: #e0412a; }
+    input:checked + .slider::before { transform: translateX(18px); background: #fff; }
+
+    .body { padding: 14px 18px; display: flex; flex-direction: column; gap: 13px; }
+
+    .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
+
+    .fear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .fear-chip {
+      display: flex; align-items: center; gap: 7px; padding: 8px 10px;
+      background: #16161c; border: 1.5px solid #222; border-radius: 10px;
+      cursor: pointer; transition: border-color .15s, background .15s; user-select: none;
+    }
+    .fear-chip:hover { border-color: #444; }
+    .fear-chip.active { border-color: #e0412a; background: #1f1018; }
+    .chip-icon { font-size: 15px; line-height: 1; flex-shrink: 0; }
+    .chip-name { font-size: 11px; font-weight: 500; color: #999; line-height: 1.2; flex: 1; }
+    .fear-chip.active .chip-name { color: #f0ede8; }
+    .chip-check {
+      width: 14px; height: 14px; border: 1.5px solid #333; border-radius: 4px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: transparent; transition: all .15s;
+    }
+    .fear-chip.active .chip-check { background: #e0412a; border-color: #e0412a; color: white; }
+
+    .divider { height: 1px; background: #1a1a20; }
+
+    .stats { display: flex; gap: 8px; }
+    .stat { flex: 1; background: #16161c; border: 1px solid #1f1f26; border-radius: 10px; padding: 8px; text-align: center; }
+    .stat-num { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+    .stat-num.red { color: #e0412a; }
+    .stat-desc { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #444; margin-top: 3px; }
+
+    .api-input-wrap { position: relative; }
+    input[type="password"], input[type="text"] {
+      width: 100%; background: #16161c; border: 1px solid #222; border-radius: 10px;
+      padding: 9px 36px 9px 11px; color: #f0ede8; font-size: 12px;
+      font-family: inherit; outline: none; transition: border-color .2s;
+    }
+    input:focus { border-color: #e0412a; }
+    input::placeholder { color: #333; }
+    .show-btn { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #444; cursor: pointer; font-size: 13px; padding: 4px; }
+    .show-btn:hover { color: #888; }
+    .api-hint { font-size: 10px; color: #3a3a42; margin-top: 5px; line-height: 1.5; }
+    .api-hint a { color: #e0412a; text-decoration: none; }
+
+    .btn-row { display: flex; gap: 8px; }
+    .btn { flex: 1; padding: 10px 8px; border: none; border-radius: 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; cursor: pointer; transition: background .2s, transform .1s; font-family: inherit; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #e0412a; color: white; }
+    .btn-primary:hover { background: #c93520; }
+    .btn-secondary { background: #1a1a22; color: #888; border: 1px solid #2a2a35; }
+    .btn-secondary:hover { background: #222230; color: #bbb; }
+
+    .status { font-size: 11px; text-align: center; color: #444; min-height: 15px; transition: color .3s; }
+    .status.ok { color: #4caf50; }
+    .status.err { color: #e0412a; }
+
+    .footer { padding: 10px 18px; border-top: 1px solid #1a1a20; display: flex; justify-content: space-between; }
+    .footer a { font-size: 10px; color: #333; text-decoration: none; }
+    .footer a:hover { color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon">🙈</div>
+      <div>
+        <div class="header-title">Fear Filter</div>
+        <div class="header-sub">AI-powered content shield</div>
+      </div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="toggleEnabled">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="body">
+    <div>
+      <div class="section-label">What do you want to hide?</div>
+      <div class="fear-grid" id="fearGrid"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="statChecked">0</div><div class="stat-desc">Checked</div></div>
+      <div class="stat"><div class="stat-num red" id="statFiltered">0</div><div class="stat-desc">Filtered</div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div>
+      <div class="section-label">Anthropic API Key</div>
+      <div class="api-input-wrap">
+        <input type="password" id="apiKey" placeholder="sk-ant-api03-..." spellcheck="false" autocomplete="off">
+        <button class="show-btn" id="showKey" title="Show/hide key">👁</button>
+      </div>
+      <div class="api-hint">Requires your own key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> · ~$0.001/image</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+      <button class="btn btn-secondary" id="scanBtn">🔍 Scan Page</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="footer">
+    <a href="#" id="onboardingLink">How to set up</a>
+    <a href="#" id="privacyLink">Privacy policy</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

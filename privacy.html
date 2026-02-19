@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Privacy Policy – Fear Filter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d0f;
+      color: #f0ede8;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 24px;
+      line-height: 1.8;
+    }
+    h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .meta { font-size: 13px; color: #555; margin-bottom: 40px; }
+    h2 { font-size: 16px; font-weight: 700; color: #fff; margin: 32px 0 10px; }
+    p { font-size: 14px; color: #999; margin-bottom: 12px; }
+    ul { font-size: 14px; color: #999; padding-left: 20px; margin-bottom: 12px; }
+    ul li { margin-bottom: 6px; }
+    strong { color: #f0ede8; }
+    a { color: #e0412a; text-decoration: none; }
+    .highlight {
+      background: #16161c;
+      border: 1px solid #1f1f26;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <div class="meta">Fear Filter Chrome Extension · Last updated: February 2026</div>
+
+  <div class="highlight">
+    <strong>Summary:</strong> Fear Filter does not collect, store, or transmit any personal data to its developers. Images from your browser are sent directly to Anthropic's API using your own API key. Nothing passes through our servers — because we don't have any.
+  </div>
+
+  <h2>What data is processed</h2>
+  <p>When Fear Filter is active, images found on web pages you visit are analyzed to detect content matching your selected fears. This analysis is performed by sending image data directly from your browser to the <strong>Anthropic Claude API</strong> (api.anthropic.com).</p>
+
+  <h2>What we collect</h2>
+  <p><strong>Nothing.</strong> Fear Filter has no backend servers, no analytics, no tracking, and no data collection of any kind. The extension developer never receives any data about you, your browsing, or the images you view.</p>
+
+  <h2>Your API key</h2>
+  <p>Your Anthropic API key is stored using Chrome's built-in <code>chrome.storage.sync</code> API, which keeps it on your local device (and optionally synced across your Chrome profile via your Google account). The key is only ever transmitted directly to <strong>api.anthropic.com</strong> — the official Anthropic API endpoint — as part of image analysis requests.</p>
+
+  <h2>Image data</h2>
+  <p>Images are temporarily fetched and sent to Anthropic's API for classification. Fear Filter does not store images, log URLs, or retain any image data. Anthropic's own privacy policy governs how they handle API requests; you can review it at <a href="https://www.anthropic.com/privacy" target="_blank">anthropic.com/privacy</a>.</p>
+
+  <h2>Permissions explained</h2>
+  <ul>
+    <li><strong>storage</strong> — to save your API key and fear preferences locally</li>
+    <li><strong>activeTab / scripting</strong> — to scan images on the page you're viewing when you click "Scan Page"</li>
+    <li><strong>host_permissions (&lt;all_urls&gt;)</strong> — to fetch images from any website for analysis, and to run the content script that blurs detected images</li>
+    <li><strong>api.anthropic.com</strong> — to send images to the Anthropic API for classification</li>
+  </ul>
+
+  <h2>Third-party services</h2>
+  <p>Fear Filter uses the <strong>Anthropic Claude API</strong> to analyze images. Your use of this extension is also subject to <a href="https://www.anthropic.com/legal/consumer-terms" target="_blank">Anthropic's Terms of Service</a> and <a href="https://www.anthropic.com/privacy" target="_blank">Privacy Policy</a>.</p>
+
+  <h2>Children's privacy</h2>
+  <p>Fear Filter is not directed at children under 13 and does not knowingly collect information from children.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>Any updates to this policy will be reflected in the extension's Chrome Web Store listing with an updated date above.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this privacy policy? You can reach us through the Chrome Web Store support tab for this extension.</p>
+</body>
+</html>

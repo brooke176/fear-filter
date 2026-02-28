@@ -1,0 +1,260 @@
+* {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    background: #0d0d0f;
+    color: #f0ede8;
+    font-family: -apple-system, "Helvetica Neue", sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+}
+
+/* ── Card ── */
+.card {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── App header ── */
+.app-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.app-icon {
+    font-size: 52px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.app-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+}
+.app-sub {
+    font-size: 12px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ── Extension status row ── */
+.status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #111118;
+    border: 1px solid #1f1f26;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
+    flex-shrink: 0;
+    transition: background 0.3s;
+}
+.status-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+}
+
+/* State-dependent visibility */
+body:not(.platform-mac, .platform-ios) .platform-mac,
+body:not(.platform-mac, .platform-ios) .platform-ios { display: none; }
+body.platform-ios .platform-mac { display: none; }
+body.platform-mac .platform-ios { display: none; }
+
+body:not(.state-on, .state-off) .state-on,
+body:not(.state-on, .state-off) .state-off { display: none; }
+body.state-on .state-off { display: none; }
+body.state-on .state-unknown { display: none; }
+body.state-off .state-on { display: none; }
+body.state-off .state-unknown { display: none; }
+
+/* Status colours when known */
+body.state-on  .status-dot { background: #4caf50; }
+body.state-off .status-dot { background: #e0412a; }
+body.state-on  .status-text.state-on  { color: #4caf50; }
+body.state-off .status-text.state-off { color: #e0412a; }
+
+/* ── Step instructions ── */
+.instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #888;
+    line-height: 1.4;
+    text-align: left;
+}
+.step b { color: #bbb; font-weight: 600; }
+.step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #1a1a22;
+    border: 1px solid #2a2a35;
+    color: #555;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: #e0412a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: #c93520; }
+.btn-primary:active { background: #b02e1b; }
+
+/* ── Divider ── */
+.divider {
+    height: 1px;
+    background: #1a1a20;
+}
+
+/* ── Pro callout ── */
+.pro-callout {
+    background: #111118;
+    border: 1px solid #252530;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.pro-callout-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f0ede8;
+    letter-spacing: 0.02em;
+}
+.pro-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pro-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    text-align: left;
+}
+.pro-feature span:first-child { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.pro-feature b { color: #999; font-weight: 600; }
+
+.btn-upgrade {
+    display: block;
+    padding: 10px;
+    background: #e0412a;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-upgrade:hover { background: #c93520; }
+
+.ios-buy-note {
+    font-size: 11px;
+    color: #444;
+    line-height: 1.5;
+    text-align: center;
+}
+.ios-buy-note b { color: #666; font-weight: 600; }
+
+/* ── Restore / error ── */
+.btn-restore {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    padding: 2px 0;
+    transition: color 0.2s;
+}
+.btn-restore:hover { color: #999; }
+.btn-restore:disabled { color: #333; cursor: default; }
+
+.iap-error {
+    font-size: 11px;
+    color: #e0412a;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* ── Pro purchased state ── */
+/* Hide the upgrade callout when pro, show the active badge instead */
+body:not(.state-pro) .state-pro    { display: none; }
+body.state-pro       .state-not-pro { display: none; }
+
+.pro-active-callout {
+    background: #0d1a0f;
+    border: 1px solid #1e3a22;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.pro-active-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4caf50;
+    letter-spacing: 0.02em;
+}
+.pro-active-note {
+    font-size: 12px;
+    color: #3a6e3e;
+    text-align: center;
+}

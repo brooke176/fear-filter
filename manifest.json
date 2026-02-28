@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Fear Filter – AI Image Blocker",
   "short_name": "Fear Filter",
-  "version": "1.0.0",
-  "description": "AI image filter that detects and blurs your fears — snakes, spiders, clowns, blood, needles, and more. Browse the web worry-free.",
+  "version": "1.4.1",
+  "description": "Automatically detects and blurs images of your fears. Pro: custom fears + visual AI detection.",
   "permissions": [
     "storage",
     "activeTab",
@@ -11,7 +11,7 @@
   ],
   "host_permissions": [
     "<all_urls>",
-    "https://api.anthropic.com/*"
+    "https://api.gumroad.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -34,11 +34,12 @@
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "web_accessible_resources": [
     {
-      "resources": ["onboarding.html", "privacy.html"],
+      "resources": ["onboarding.html", "privacy.html", "transformers.bundle.js"],
       "matches": ["<all_urls>"]
     }
   ]

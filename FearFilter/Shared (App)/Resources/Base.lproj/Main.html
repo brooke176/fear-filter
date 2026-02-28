@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="../Style.css">
+    <script src="../Script.js" defer></script>
+</head>
+<body>
+    <div class="card">
+
+        <!-- Header -->
+        <div class="app-header">
+            <div class="app-icon">🙈</div>
+            <div class="app-title">Fear Filter</div>
+            <div class="app-sub">Browse without fear</div>
+        </div>
+
+        <!-- Extension status -->
+        <div class="status-row">
+            <div class="status-dot"></div>
+            <span class="status-text state-unknown">Checking extension…</span>
+            <span class="status-text state-on">Extension is active in Safari</span>
+            <span class="status-text state-off">Extension is off in Safari</span>
+        </div>
+
+        <!-- iOS instructions -->
+        <div class="platform-ios instructions">
+            <div class="step"><span class="step-num">1</span><span>Open <b>Settings → Apps → Safari → Extensions</b></span></div>
+            <div class="step"><span class="step-num">2</span><span>Enable <b>Fear Filter</b></span></div>
+            <div class="step"><span class="step-num">3</span><span>In Safari, tap <b>Aa → Fear Filter</b> to configure</span></div>
+        </div>
+
+        <!-- macOS instructions (extension off) -->
+        <div class="platform-mac state-off instructions">
+            <div class="step"><span class="step-num">1</span><span>Click the button below to open Safari settings</span></div>
+            <div class="step"><span class="step-num">2</span><span>Check the box next to <b>Fear Filter</b></span></div>
+        </div>
+
+        <!-- macOS button -->
+        <button class="platform-mac open-preferences btn-primary">Open Safari Settings…</button>
+
+        <div class="divider"></div>
+
+        <!-- Pro features callout — hidden once purchased -->
+        <div class="pro-callout state-not-pro">
+            <div class="pro-callout-title">✦ Fear Filter Pro</div>
+            <div class="pro-features">
+                <div class="pro-feature"><span>🫣</span><span>Add <b>custom fears</b> beyond the 12 built-in categories</span></div>
+                <div class="pro-feature"><span>🧠</span><span><b>Visual AI detection</b> — catches images with no text labels</span></div>
+                <div class="pro-feature"><span>🔒</span><span>Everything runs <b>on-device</b> — no data sent anywhere</span></div>
+            </div>
+
+            <!-- Apple IAP — available on both macOS and iOS -->
+            <button class="btn-upgrade" id="buyBtn">Get Fear Filter Pro  ✦</button>
+            <button class="btn-restore" id="restoreBtn">Restore Purchase</button>
+            <p class="iap-error" id="iapError" hidden></p>
+        </div>
+
+        <!-- Purchased state -->
+        <div class="pro-active-callout state-pro">
+            <div class="pro-active-badge">✦ Fear Filter Pro — Active</div>
+            <p class="pro-active-note">Pro features are unlocked in the extension.</p>
+        </div>
+
+    </div>
+</body>
+</html>

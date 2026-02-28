@@ -1,146 +1,307 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Fear Filter</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      width: 320px;
-      background: #0d0d0f;
-      color: #f0ede8;
-      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fear Filter</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        width: 320px;
+        background: #0d0d0f;
+        color: #f0ede8;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
 
-    .header {
-      padding: 14px 18px 12px;
-      background: linear-gradient(135deg, #1a1a1f, #0d0d0f);
-      border-bottom: 1px solid #1f1f26;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-icon { font-size: 24px; line-height: 1; }
-    .header-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
-    .header-sub { font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; color: #444; margin-top: 2px; }
+      /* ── Header ── */
+      .header {
+        padding: 14px 18px 12px;
+        background: linear-gradient(135deg, #1a1a1f, #0d0d0f);
+        border-bottom: 1px solid #1f1f26;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left { display: flex; align-items: center; gap: 10px; }
+      .header-icon { font-size: 24px; line-height: 1; }
+      .header-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+      .header-sub {
+        font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em;
+        color: #444; margin-top: 2px; display: flex; align-items: center; gap: 5px;
+      }
+      .pro-badge {
+        display: none;
+        font-size: 8px; font-weight: 800; letter-spacing: 0.08em;
+        background: linear-gradient(135deg, #f5a623, #e0412a);
+        color: white; padding: 2px 5px; border-radius: 4px;
+        text-transform: uppercase;
+      }
 
-    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; inset: 0; background: #2a2a35; border-radius: 22px; cursor: pointer; transition: .25s; }
-    .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #555; border-radius: 50%; transition: .25s; }
-    input:checked + .slider { background: #e0412a; }
-    input:checked + .slider::before { transform: translateX(18px); background: #fff; }
+      /* ── Toggle ── */
+      .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+      .toggle input { opacity: 0; width: 0; height: 0; }
+      .slider {
+        position: absolute; inset: 0; background: #2a2a35;
+        border-radius: 22px; cursor: pointer; transition: 0.25s;
+      }
+      .slider::before {
+        content: ""; position: absolute; width: 16px; height: 16px;
+        left: 3px; top: 3px; background: #555; border-radius: 50%; transition: 0.25s;
+      }
+      input:checked + .slider { background: #e0412a; }
+      input:checked + .slider::before { transform: translateX(18px); background: #fff; }
 
-    .body { padding: 14px 18px; display: flex; flex-direction: column; gap: 13px; }
+      /* ── Body ── */
+      .body { padding: 14px 18px; display: flex; flex-direction: column; gap: 13px; }
 
-    .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 8px; }
+      .section-label {
+        font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+        text-transform: uppercase; color: #555; margin-bottom: 8px;
+      }
 
-    .fear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .fear-chip {
-      display: flex; align-items: center; gap: 7px; padding: 8px 10px;
-      background: #16161c; border: 1.5px solid #222; border-radius: 10px;
-      cursor: pointer; transition: border-color .15s, background .15s; user-select: none;
-    }
-    .fear-chip:hover { border-color: #444; }
-    .fear-chip.active { border-color: #e0412a; background: #1f1018; }
-    .chip-icon { font-size: 15px; line-height: 1; flex-shrink: 0; }
-    .chip-name { font-size: 11px; font-weight: 500; color: #999; line-height: 1.2; flex: 1; }
-    .fear-chip.active .chip-name { color: #f0ede8; }
-    .chip-check {
-      width: 14px; height: 14px; border: 1.5px solid #333; border-radius: 4px;
-      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 9px; color: transparent; transition: all .15s;
-    }
-    .fear-chip.active .chip-check { background: #e0412a; border-color: #e0412a; color: white; }
+      /* ── Fear chips ── */
+      .fear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+      .fear-chip {
+        display: flex; align-items: center; gap: 7px; padding: 8px 10px;
+        background: #16161c; border: 1.5px solid #222; border-radius: 10px;
+        cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none;
+      }
+      .fear-chip:hover { border-color: #444; }
+      .fear-chip.active { border-color: #e0412a; background: #1f1018; }
+      .chip-icon { font-size: 15px; line-height: 1; flex-shrink: 0; }
+      .chip-name { font-size: 11px; font-weight: 500; color: #999; line-height: 1.2; flex: 1; }
+      .fear-chip.active .chip-name { color: #f0ede8; }
+      .chip-check {
+        width: 14px; height: 14px; border: 1.5px solid #333; border-radius: 4px;
+        flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        font-size: 9px; color: transparent; transition: all 0.15s;
+      }
+      .fear-chip.active .chip-check { background: #e0412a; border-color: #e0412a; color: white; }
 
-    .divider { height: 1px; background: #1a1a20; }
+      /* ── Custom fear chips ── */
+      .fear-chip.custom-chip { position: relative; padding-top: 10px; }
+      .chip-remove {
+        position: absolute; top: 3px; right: 3px; width: 13px; height: 13px;
+        background: #2a2a35; border: none; border-radius: 50%; color: #555;
+        font-size: 9px; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; padding: 0; line-height: 1;
+        transition: background 0.15s, color 0.15s; font-family: inherit;
+      }
+      .chip-remove:hover { background: #e0412a; color: white; }
 
-    .stats { display: flex; gap: 8px; }
-    .stat { flex: 1; background: #16161c; border: 1px solid #1f1f26; border-radius: 10px; padding: 8px; text-align: center; }
-    .stat-num { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
-    .stat-num.red { color: #e0412a; }
-    .stat-desc { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #444; margin-top: 3px; }
+      /* ── Custom fear input (Pro-gated) ── */
+      .custom-section { position: relative; margin-top: 8px; }
+      .custom-add-row { display: flex; gap: 7px; }
+      .custom-add-row input {
+        flex: 1; background: #16161c; border: 1px solid #222; border-radius: 8px;
+        padding: 7px 10px; color: #f0ede8; font-size: 11px; font-family: inherit;
+        outline: none; transition: border-color 0.2s; min-width: 0;
+      }
+      .custom-add-row input:focus { border-color: #e0412a; }
+      .custom-add-row input::placeholder { color: #2e2e38; }
+      .custom-add-row input:disabled { opacity: 0.35; cursor: not-allowed; }
+      .btn-add-fear {
+        background: #16161c; border: 1.5px solid #2a2a35; border-radius: 8px;
+        color: #666; font-size: 11px; font-weight: 700; padding: 7px 10px;
+        cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+        white-space: nowrap; flex-shrink: 0;
+      }
+      .btn-add-fear:hover { border-color: #e0412a; color: #f0ede8; }
+      .btn-add-fear:disabled { opacity: 0.35; cursor: not-allowed; }
+      /* Frosted lock overlay on custom section */
+      .custom-lock-overlay {
+        display: none; /* shown by JS when not isPro */
+        position: absolute; inset: 0;
+        background: rgba(13,13,15,0.75);
+        backdrop-filter: blur(1px);
+        border-radius: 8px;
+        align-items: center; justify-content: center;
+        gap: 6px; cursor: default; z-index: 5;
+        font-size: 11px; color: #555; font-weight: 600;
+      }
 
-    .api-input-wrap { position: relative; }
-    input[type="password"], input[type="text"] {
-      width: 100%; background: #16161c; border: 1px solid #222; border-radius: 10px;
-      padding: 9px 36px 9px 11px; color: #f0ede8; font-size: 12px;
-      font-family: inherit; outline: none; transition: border-color .2s;
-    }
-    input:focus { border-color: #e0412a; }
-    input::placeholder { color: #333; }
-    .show-btn { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #444; cursor: pointer; font-size: 13px; padding: 4px; }
-    .show-btn:hover { color: #888; }
-    .api-hint { font-size: 10px; color: #3a3a42; margin-top: 5px; line-height: 1.5; }
-    .api-hint a { color: #e0412a; text-decoration: none; }
+      /* ── Stats ── */
+      .stats { display: flex; gap: 8px; }
+      .stat {
+        flex: 1; background: #16161c; border: 1px solid #1f1f26;
+        border-radius: 10px; padding: 8px; text-align: center;
+      }
+      .stat-num { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+      .stat-num.red { color: #e0412a; }
+      .stat-desc { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #444; margin-top: 3px; }
 
-    .btn-row { display: flex; gap: 8px; }
-    .btn { flex: 1; padding: 10px 8px; border: none; border-radius: 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; cursor: pointer; transition: background .2s, transform .1s; font-family: inherit; }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: #e0412a; color: white; }
-    .btn-primary:hover { background: #c93520; }
-    .btn-secondary { background: #1a1a22; color: #888; border: 1px solid #2a2a35; }
-    .btn-secondary:hover { background: #222230; color: #bbb; }
+      /* ── Divider ── */
+      .divider { height: 1px; background: #1a1a20; }
 
-    .status { font-size: 11px; text-align: center; color: #444; min-height: 15px; transition: color .3s; }
-    .status.ok { color: #4caf50; }
-    .status.err { color: #e0412a; }
+      /* ── Pro upgrade section (shown when not Pro) ── */
+      .pro-upgrade {
+        background: #111118; border: 1px solid #252530;
+        border-radius: 12px; padding: 12px;
+        display: flex; flex-direction: column; gap: 9px;
+      }
+      .pro-upgrade-title {
+        font-size: 12px; font-weight: 700; color: #f0ede8;
+        display: flex; align-items: center; gap: 7px;
+      }
+      .pro-upgrade-title span:first-child { font-size: 14px; }
+      .pro-upgrade-desc { font-size: 10px; color: #555; line-height: 1.5; }
+      .pro-upgrade-desc b { color: #888; font-weight: 600; }
+      .pro-key-row { display: flex; gap: 7px; }
+      .pro-key-row input {
+        flex: 1; background: #0d0d0f; border: 1px solid #252530; border-radius: 8px;
+        padding: 7px 10px; color: #f0ede8;
+        font-size: 11px; font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        outline: none; transition: border-color 0.2s; min-width: 0; letter-spacing: 0.05em;
+      }
+      .pro-key-row input:focus { border-color: #e0412a; }
+      .pro-key-row input::placeholder { color: #2a2a35; font-family: inherit; letter-spacing: 0; }
+      .btn-activate {
+        background: #e0412a; border: none; border-radius: 8px;
+        color: white; font-size: 11px; font-weight: 700;
+        padding: 7px 12px; cursor: pointer; font-family: inherit;
+        transition: background 0.15s; white-space: nowrap; flex-shrink: 0;
+      }
+      .btn-activate:hover { background: #c93520; }
+      .btn-activate:disabled { background: #2a2a35; color: #555; cursor: not-allowed; }
+      .pro-buy-row {
+        display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+        font-size: 10px; color: #383840;
+      }
+      .pro-buy-row a { color: #555; text-decoration: none; transition: color 0.15s; white-space: nowrap; }
+      .pro-buy-row a:hover { color: #f0ede8; }
+      .pro-key-hint { color: #404048; line-height: 1.4; }
+      .pro-key-hint b { color: #555; font-weight: 600; }
 
-    .footer { padding: 10px 18px; border-top: 1px solid #1a1a20; display: flex; justify-content: space-between; }
-    .footer a { font-size: 10px; color: #333; text-decoration: none; }
-    .footer a:hover { color: #666; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="header-left">
-      <div class="header-icon">🙈</div>
+      /* ── Pro active section (shown when Pro) ── */
+      .pro-active {
+        display: none; /* shown by JS when isPro */
+        background: #0b1a0e; border: 1px solid #1a3020;
+        border-radius: 12px; padding: 10px 14px;
+        align-items: center; justify-content: space-between;
+      }
+      .pro-active-label {
+        font-size: 11px; font-weight: 600; color: #4caf50;
+        display: flex; align-items: center; gap: 6px;
+      }
+      .btn-deactivate {
+        background: transparent; border: 1px solid #1a3020; border-radius: 6px;
+        color: #2e4a30; font-size: 10px; font-weight: 600;
+        padding: 4px 8px; cursor: pointer; font-family: inherit;
+        transition: border-color 0.15s, color 0.15s;
+      }
+      .btn-deactivate:hover { border-color: #e0412a; color: #e0412a; }
+
+      /* ── Action buttons ── */
+      .btn-row { display: flex; gap: 8px; }
+      .btn {
+        flex: 1; padding: 10px 8px; border: none; border-radius: 10px;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.03em;
+        cursor: pointer; transition: background 0.2s, transform 0.1s; font-family: inherit;
+      }
+      .btn:active { transform: scale(0.97); }
+      .btn-primary { background: #e0412a; color: white; }
+      .btn-primary:hover { background: #c93520; }
+      .btn-secondary { background: #1a1a22; color: #888; border: 1px solid #2a2a35; }
+      .btn-secondary:hover { background: #222230; color: #bbb; }
+
+      /* ── Status ── */
+      .status { font-size: 11px; text-align: center; color: #444; min-height: 15px; transition: color 0.3s; }
+      .status.ok { color: #4caf50; }
+      .status.err { color: #e0412a; }
+
+      /* ── Footer ── */
+      .footer { padding: 10px 18px; border-top: 1px solid #1a1a20; display: flex; justify-content: space-between; }
+      .footer a { font-size: 10px; color: #333; text-decoration: none; }
+      .footer a:hover { color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-left">
+        <div class="header-icon">🙈</div>
+        <div>
+          <div class="header-title">Fear Filter</div>
+          <div class="header-sub">
+            <span>No sign-up required</span>
+            <span class="pro-badge" id="proBadge">PRO</span>
+          </div>
+        </div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="toggleEnabled" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="body">
+      <!-- Built-in fear selection (always free) -->
       <div>
-        <div class="header-title">Fear Filter</div>
-        <div class="header-sub">AI-powered content shield</div>
+        <div class="section-label">What do you want to hide?</div>
+        <div class="fear-grid" id="fearGrid"></div>
+
+        <!-- Custom fears row — Pro only -->
+        <div class="custom-section" id="customSection">
+          <div class="custom-add-row">
+            <input type="text" id="customFearInput" placeholder="Add your own fear…" maxlength="30" spellcheck="false" autocomplete="off" disabled />
+            <button class="btn-add-fear" id="addFearBtn" disabled>+ Add</button>
+          </div>
+          <!-- Frosted overlay shown when not Pro -->
+          <div class="custom-lock-overlay" id="customLockOverlay">
+            🔒 &nbsp;Custom fears · Pro feature
+          </div>
+        </div>
       </div>
-    </div>
-    <label class="toggle">
-      <input type="checkbox" id="toggleEnabled">
-      <span class="slider"></span>
-    </label>
-  </div>
 
-  <div class="body">
-    <div>
-      <div class="section-label">What do you want to hide?</div>
-      <div class="fear-grid" id="fearGrid"></div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><div class="stat-num" id="statChecked">0</div><div class="stat-desc">Checked</div></div>
-      <div class="stat"><div class="stat-num red" id="statFiltered">0</div><div class="stat-desc">Filtered</div></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div>
-      <div class="section-label">Anthropic API Key</div>
-      <div class="api-input-wrap">
-        <input type="password" id="apiKey" placeholder="sk-ant-api03-..." spellcheck="false" autocomplete="off">
-        <button class="show-btn" id="showKey" title="Show/hide key">👁</button>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num" id="statChecked">0</div>
+          <div class="stat-desc">Checked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num red" id="statFiltered">0</div>
+          <div class="stat-desc">Filtered</div>
+        </div>
       </div>
-      <div class="api-hint">Requires your own key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> · ~$0.001/image</div>
+
+      <div class="divider"></div>
+
+      <!-- Pro upgrade panel (hidden when Pro) -->
+      <div class="pro-upgrade" id="proUpgrade">
+        <div class="pro-upgrade-title">
+          <span>🔒</span>
+          <span>Fear Filter Pro</span>
+        </div>
+        <div class="pro-upgrade-desc">
+          Unlock <b>custom fears</b> and <b>visual AI detection</b> (CLIP) —
+          catches images with no text labels. One-time purchase, no subscription.
+        </div>
+        <div class="pro-key-row">
+          <input type="text" id="licenseKeyInput" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" spellcheck="false" autocomplete="off" />
+          <button class="btn-activate" id="activateBtn">Activate</button>
+        </div>
+        <div class="pro-buy-row">
+          <span class="pro-key-hint">Check your Gumroad receipt email for a <b>License Key</b> (not the Order ID).</span>
+          <a href="#" id="buyLink">Buy Pro →</a>
+        </div>
+      </div>
+
+      <!-- Pro active panel (shown when Pro) -->
+      <div class="pro-active" id="proActive">
+        <span class="pro-active-label">✦ &nbsp;Fear Filter Pro · Active</span>
+        <button class="btn-deactivate" id="deactivateBtn">Deactivate</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+        <button class="btn btn-secondary" id="scanBtn">🔍 Scan Page</button>
+      </div>
+      <div class="status" id="status"></div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn btn-primary" id="saveBtn">Save Settings</button>
-      <button class="btn btn-secondary" id="scanBtn">🔍 Scan Page</button>
+    <div class="footer">
+      <a href="#" id="onboardingLink">How to set up</a>
+      <a href="#" id="privacyLink">Privacy policy</a>
     </div>
-    <div class="status" id="status"></div>
-  </div>
 
-  <div class="footer">
-    <a href="#" id="onboardingLink">How to set up</a>
-    <a href="#" id="privacyLink">Privacy policy</a>
-  </div>
-
-  <script src="popup.js"></script>
-</body>
+    <script src="popup.js"></script>
+  </body>
 </html>

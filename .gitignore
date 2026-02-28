@@ -1,0 +1,24 @@
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+transformers.bundle.js
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Xcode ─────────────────────────────────────────────────────────────────────
+xcuserdata/
+**/*.xcuserstate
+**/xcuserdata/
+DerivedData/
+*.xcscmblueprint
+*.xccheckout
+build/
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+ziLuKYVD
+fearfilter-appstore-screenshot.png
+apple-review-reply.md
+logo-concepts/
+logo-concepts.html

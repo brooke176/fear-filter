@@ -1,32 +1,99 @@
 // background.js - Fear Filter
+// Open-source image detection: no API key required.
+//
+// Detection runs in two layers:
+//   1. Instant HTML metadata check (alt text, captions, etc.) — free, zero latency
+//   2. Transformers.js CLIP model running locally in the browser — private, no server
+//
+// The CLIP model (~170MB) is downloaded once from Hugging Face and cached by the browser.
+// NOTE: For production builds, bundle Transformers.js locally instead of using the CDN.
+//       Run: npm install @huggingface/transformers  then bundle with vite/rollup/webpack.
 
-const FEAR_PROMPTS = {
-  snakes:      'Does this image contain a snake or serpent?',
-  spiders:     'Does this image contain a spider or tarantula?',
-  clowns:      'Does this image contain a clown?',
-  needles:     'Does this image contain a needle, syringe, or injection?',
-  blood:       'Does this image contain blood or visible gore/wounds?',
-  heights:     'Does this image show a scene from a dangerous height such as a rooftop edge, cliff edge, or tall ladder?',
-  sharks:      'Does this image contain a shark?',
-  rats:        'Does this image contain a rat or mouse?',
-  cockroaches: 'Does this image contain a cockroach or similar large insect pest?',
-  wasps:       'Does this image contain a wasp, hornet, or bee?',
-  dolls:       'Does this image contain a doll, puppet, or mannequin with a human-like face?',
-  eyes:        'Does this image contain an extreme close-up of a human eye or eyes?',
+// ── Keyword lists for instant HTML metadata matching ──────────────────────────
+const FEAR_KEYWORDS = {
+  snakes:      ['snake', 'serpent', 'cobra', 'viper', 'boa', 'anaconda', 'rattlesnake', 'mamba', 'asp', 'python snake',
+                'squamata', 'colubridae', 'elapidae', 'viperidae'],  // scientific family names
+  spiders:     ['spider', 'tarantula', 'arachnid', 'black widow', 'brown recluse', 'wolf spider',
+                'araneae', 'araneomorphae', 'mygalomorphae', 'theraphosidae'],  // scientific order/families
+  clowns:      ['clown', 'jester', 'pennywise', 'coulrophobia'],
+  needles:     ['needle', 'syringe', 'injection', 'vaccine', 'hypodermic', 'inoculation', 'venipuncture', 'phlebotomy'],
+  blood:       ['blood', 'bloody', 'gore', 'gory', 'bleeding', 'hemorrhage', 'haemorrhage', 'hematoma', 'wound'],
+  sharks:      ['shark', 'sharks', 'great white', 'hammerhead', 'bull shark', 'tiger shark',
+                'whale shark', 'selachii', 'carcharodon', 'lamniformes', 'selachimorpha'],
+  rats:        ['rat', 'rats', 'mice', 'rodent', 'vermin', 'field mouse', 'house mouse',
+                'muridae', 'rattus', 'mus musculus'],  // scientific names
+  cockroaches: ['cockroach', 'cockroaches', 'roach', 'roaches', 'blattodea', 'blattella'],
+  wasps:       ['wasp', 'wasps', 'hornet', 'hornets', 'yellowjacket', 'yellow jacket', 'vespidae', 'vespula'],
+  dolls:       ['doll', 'puppet', 'mannequin', 'ventriloquist', 'marionette', 'automaton', 'effigy'],
+  eyes:        ['close-up eye', 'closeup eye', 'eye macro', 'macro eye', 'iris close', 'pupil close',
+                'cornea', 'iris photograph', 'human eye close', 'eye close-up', 'extreme close'],
 };
 
-// Open onboarding page on first install
+// ── CLIP text labels for visual detection ─────────────────────────────────────
+const FEAR_CLIP_LABELS = {
+  snakes:      'a photo of a snake or serpent',
+  spiders:     'a photo of a spider or tarantula',
+  clowns:      'a photo of a clown with face paint',
+  needles:     'a photo of a hypodermic needle or syringe',
+  blood:       'a photo containing blood or gore',
+  sharks:      'a photo of a shark',
+  rats:        'a photo of a rat or mouse',
+  cockroaches: 'a photo of a cockroach',
+  wasps:       'a photo of a wasp, hornet, or bee',
+  dolls:       'a photo of a creepy doll, puppet, or mannequin',
+  eyes:        'an extreme close-up photograph of a human eye',
+};
+
+// ── CLIP pipeline singleton ───────────────────────────────────────────────────
+// Lazy-loaded and cached for the lifetime of the service worker.
+// If the CDN is unavailable or CSP blocks it, CLIP silently falls back to null
+// and the extension continues to work using HTML metadata detection only.
+let _classifier = null;
+let _classifierPromise = null;
+
+async function getClassifier() {
+  if (_classifier) return _classifier;
+  if (_classifierPromise) return _classifierPromise;
+
+  _classifierPromise = (async () => {
+    try {
+      // Locally bundled — generate with: npm install && npm run build
+      // (Chrome extensions cannot load scripts from external URLs)
+      const { pipeline, env } = await import(
+        chrome.runtime.getURL('transformers.bundle.js')
+      );
+      env.useBrowserCache = true;
+      env.allowLocalModels = false;
+      const clf = await pipeline(
+        'zero-shot-image-classification',
+        'Xenova/clip-vit-base-patch32',
+        { dtype: 'q8' } // quantized: ~85MB vs ~340MB, minimal accuracy trade-off
+      );
+      _classifier = clf;
+      return clf;
+    } catch (err) {
+      console.warn('[FearFilter] AI model unavailable, using text-only detection:', err.message);
+      _classifierPromise = null; // allow retry on next check
+      return null;
+    }
+  })();
+
+  return _classifierPromise;
+}
+
+// ── Onboarding ────────────────────────────────────────────────────────────────
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('onboarding.html') });
   }
 });
 
+// ── Message handler ───────────────────────────────────────────────────────────
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CHECK_IMAGE') {
-    checkImage(message.imageUrl, message.apiKey, message.fears)
+    const isPro = message.isPro === true;
+    checkImage(message.imageUrl, message.fears, message.htmlMeta, message.customFears, isPro)
       .then(matched => {
-        // Update stats
         chrome.storage.sync.get(['totalChecked', 'totalFiltered'], (data) => {
           const updates = { totalChecked: (data.totalChecked || 0) + 1 };
           if (matched) updates.totalFiltered = (data.totalFiltered || 0) + 1;
@@ -35,20 +102,90 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true, matched });
       })
       .catch(err => sendResponse({ success: false, error: err.message }));
-    return true;
+    return true; // keep message channel open for async response
   }
 });
 
-function guessMediaType(url, blobType) {
-  const valid = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  if (blobType && valid.includes(blobType)) return blobType;
-  const ext = url.split('?')[0].split('.').pop().toLowerCase();
-  const map = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
-  return map[ext] || 'image/jpeg';
+// ── Layer 1: HTML metadata keyword check (instant, zero network cost) ─────────
+function checkHtmlMeta(htmlMeta, fears, customFears = []) {
+  if (!htmlMeta) return null;
+  const text = [htmlMeta.alt, htmlMeta.title, htmlMeta.ariaLabel, htmlMeta.caption, htmlMeta.nearby, htmlMeta.urlHint]
+    .filter(Boolean)
+    .join(' ');
+  if (!text.trim()) return null;
+
+  for (const fear of fears) {
+    // Built-in fear: use keyword list
+    const keywords = FEAR_KEYWORDS[fear];
+    if (keywords) {
+      for (const kw of keywords) {
+        const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp(`\\b${escaped}\\b`, 'i').test(text)) return fear;
+      }
+    } else {
+      // Custom fear: match the fear name itself as a keyword
+      const custom = customFears.find(f => f.id === fear);
+      if (custom) {
+        const escaped = custom.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp(`\\b${escaped}\\b`, 'i').test(text)) return fear;
+      }
+    }
+  }
+  return null;
 }
 
-async function checkImage(imageUrl, apiKey, fears) {
+// ── Layer 2: CLIP visual classification (local, private, no server) ───────────
+async function checkImageWithClip(imageData, mediaType, fears, customFears = []) {
+  // Build label list: built-in fears use their pre-written labels;
+  // custom fears get a generated label from the fear name.
+  const fearLabels = fears.map(f => {
+    if (FEAR_CLIP_LABELS[f]) return FEAR_CLIP_LABELS[f];
+    const custom = customFears.find(c => c.id === f);
+    return custom ? `a photo of ${custom.name.toLowerCase()}` : null;
+  }).filter(Boolean);
+  if (fearLabels.length === 0) return null;
+
+  const classifier = await getClassifier();
+  if (!classifier) return null; // model unavailable, skip gracefully
+
+  const neutralLabel = 'a normal everyday photo with none of those things';
+  const allLabels = [...fearLabels, neutralLabel];
+  const dataUrl = `data:${mediaType};base64,${imageData}`;
+
+  // Results are sorted by score descending.
+  // If neutral wins, or all scores are below threshold, return null.
+  const THRESHOLD = 0.25;
+  const results = await classifier(dataUrl, allLabels);
+
+  for (const { label, score } of results) {
+    if (label === neutralLabel || score < THRESHOLD) break;
+    // Match back to fear ID — check built-in first, then custom
+    const matchedFear = fears.find(f => {
+      if (FEAR_CLIP_LABELS[f] === label) return true;
+      const custom = customFears.find(c => c.id === f);
+      return custom ? `a photo of ${custom.name.toLowerCase()}` === label : false;
+    });
+    if (matchedFear) return matchedFear;
+  }
+  return null;
+}
+
+// ── Main entry point ──────────────────────────────────────────────────────────
+async function checkImage(imageUrl, fears, htmlMeta, customFears = [], isPro = false) {
   if (!fears || fears.length === 0) return null;
+
+  // Free users: strip out custom fear IDs so they don't get matched
+  const activeCustomFears = isPro ? customFears : [];
+  const activeFearsFiltered = isPro
+    ? fears
+    : fears.filter(f => !f.startsWith('custom_'));
+
+  // Layer 1: instant HTML metadata check (free + pro)
+  const metaMatch = checkHtmlMeta(htmlMeta, activeFearsFiltered, activeCustomFears);
+  if (metaMatch) return metaMatch;
+
+  // Layer 2: CLIP visual classification — Pro only
+  if (!isPro) return null;
 
   let imageData, mediaType;
   try {
@@ -56,7 +193,7 @@ async function checkImage(imageUrl, apiKey, fears) {
     if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
     const blob = await response.blob();
     mediaType = guessMediaType(imageUrl, blob.type);
-    if (blob.size > 4 * 1024 * 1024) return null;
+    if (blob.size > 4 * 1024 * 1024) return null; // skip images over 4MB
 
     const buffer = await blob.arrayBuffer();
     const bytes = new Uint8Array(buffer);
@@ -66,46 +203,21 @@ async function checkImage(imageUrl, apiKey, fears) {
       binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
     }
     imageData = btoa(binary);
-  } catch (e) {
+  } catch {
     return null;
   }
 
-  const checks = fears.map(f => FEAR_PROMPTS[f]).filter(Boolean);
-  if (checks.length === 0) return null;
-
-  const prompt = `Analyze this image and answer each question with only YES or NO, one per line, in order:\n${checks.map((q, i) => `${i + 1}. ${q}`).join('\n')}`;
-
-  const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 60,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageData } },
-          { type: 'text', text: prompt }
-        ]
-      }]
-    })
-  });
-
-  if (!apiResponse.ok) {
-    const errBody = await apiResponse.json().catch(() => ({}));
-    throw new Error(errBody.error?.message || `API error ${apiResponse.status}`);
+  try {
+    return await checkImageWithClip(imageData, mediaType, activeFearsFiltered, activeCustomFears);
+  } catch {
+    return null; // graceful fallback
   }
+}
 
-  const data = await apiResponse.json();
-  const lines = data.content?.[0]?.text?.trim().split('\n') || [];
-
-  for (let i = 0; i < fears.length; i++) {
-    if ((lines[i] || '').toUpperCase().includes('YES')) return fears[i];
-  }
-  return null;
+function guessMediaType(url, blobType) {
+  const valid = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (blobType && valid.includes(blobType)) return blobType;
+  const ext = url.split('?')[0].split('.').pop().toLowerCase();
+  const map = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
+  return map[ext] || 'image/jpeg';
 }
